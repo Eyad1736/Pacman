@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recycling Pacman - Bism Company</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        canvas {
+            background-color: black;
+            display: block;
+            margin: 20px auto;
+        }
+        .game-info {
+            margin-top: 20px;
+        }
+        .game-info p {
+            font-size: 1.2em;
+        }
+        .game-info .weather, .game-info .sdg {
+            font-weight: bold;
+        }
+        #company {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        a {
+            color: blue;
+            text-decoration: none;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="company">Bism Company</div>
+
+    <h1>Recycling Pacman Game</h1>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <div class="game-info">
+        <p>Year: <span id="year">2024</span></p>
+        <p>Weather: <span class="weather" id="weather">Sunny</span></p>
+        <p>Wind Velocity: <span class="weather" id="wind">10 km/h</span></p>
+        <p>SDG Message: <span class="sdg" id="sdgMessage">SDG 13: Climate Action - Reduce greenhouse emissions!</span></p>
+        <p>Score: <span id="score">0</span></p>
+    </div>
+
+
+    <script>
+        // Initialize game variables
+        let canvas = document.getElementById("gameCanvas");
+        let ctx = canvas.getContext("2d");
+        let pacman = { x: 50, y: 50, size: 20, speed: 2, direction: null };
+       // let trashImage = new Image();
+       // trashImage.src = 'https://th.bing.com/th/id/OIP.Uv-eZQsDUpwBmMBmAR43rgAAAA?w=187&h=186&c=7&r=0&o=5&dpr=2.5&pid=1.7'; // Image of trash
+        let trash = { x: 100, y: 100, size: 20 };
+        let score = 0;
+        let year = 2024;
+        let weather = "Sunny";
+        let wind = 10;
+        let sdgMessages = [
+            "SDG 13: Climate Action - Reduce greenhouse emissions!",
+            "SDG 12: Responsible Consumption and Production - Reduce waste!",
+            "SDG 6: Clean Water and Sanitation - Stop plastic pollution!"
+        ];
+
+        // Update HTML elements
+        const scoreElement = document.getElementById("score");
+        const yearElement = document.getElementById("year");
+        const weatherElement = document.getElementById("weather");
+        const sdgMessageElement = document.getElementById("sdgMessage");
+        const windElement = document.getElementById("wind");
+
+        // Draw Pacman
+        function drawPacman(str) {
+            ctx.beginPath();
+            if(str == "right")
+            ctx.arc(pacman.x, pacman.y, pacman.size, 0.2 * Math.PI, 1.8 * Math.PI);  // right shape
+          else if(str=="down")  ctx.arc(pacman.x, pacman.y, pacman.size, 0.7 * Math.PI, 2.3 * Math.PI);  //  down
+          else if(str == "left")  ctx.arc(pacman.x, pacman.y, pacman.size, 1.2 * Math.PI, 2.8 * Math.PI);  // left shape
+           else  ctx.arc(pacman.x, pacman.y, pacman.size, 1.7 * Math.PI, 3.3 * Math.PI);  // up shape
+
+            ctx.lineTo(pacman.x, pacman.y);
+            ctx.fillStyle = "yellow";
+            ctx.fill();
+
+            ctx.closePath();
+        }
+
+        // Draw Trash
+        function drawTrash() {
+            ctx.drawImage(trashImage, trash.x, trash.y, trash.size, trash.size);
+        }
+
+function clearPacman() {
+    ctx.clearRect(pacman.x - pacman.size, pacman.y - pacman.size, pacman.size * 2, pacman.size * 2);
+}
+        // Move Pacman
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowUp") {
+              pacman.direction = "up";
+            }
+            if (e.key === "ArrowDown") {
+                 pacman.direction = "down";
+            } 
+            if (e.key === "ArrowLeft")
+{
+                 pacman.direction = "left";
+
+}
+            if (e.key === "ArrowRight") {
+                pacman.direction = "right";
+            }
+
+              drawPacman(pacman.direction )
+
+        });
+
+        function movePacman() {
+if(pacman.direction != null)
+{
+    drawPacman(pacman.direction)
+
+                      if (pacman.direction === "up" && pacman.y > 0) pacman.y -= pacman.speed;
+                        if (pacman.direction === "down" && pacman.y < canvas.height - pacman.size) pacman.y += pacman.speed;
+                        if (pacman.direction === "left" && pacman.x > 0) pacman.x -= pacman.speed;
+                        if (pacman.direction === "right" && pacman.x < canvas.width - pacman.size) pacman.x += pacman.speed;
+
+                        // Check if Pacman eats trash
+                        if (Math.abs(pacman.x - trash.x) < pacman.size && Math.abs(pacman.y - trash.y) < pacman.size) {
+                            score += 5;
+                            scoreElement.innerText = score;
+                            generateNewTrash();
+                            updateGameConditions();
+                        }
+            }
+      
+        }
+
+        // Generate new trash position
+        function generateNewTrash() {
+            trash.x = Math.random() * (canvas.width - trash.size);
+            trash.y = Math.random() * (canvas.height - trash.size);
+        }
+
+        // Update game conditions (weather, SDG, year, wind velocity)
+        function updateGameConditions() {
+            year++;
+           // yearElement.innerText = year;
+
+            // Update weather every 5 years
+            if (year % 5 === 0) {
+                let weatherConditions = ["Sunny", "Rainy", "Stormy"];
+                weather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+             //   weatherElement.innerText = weather;
+
+                // Update wind velocity based on weather
+                if (weather === "Sunny") {
+                    wind = 10;
+                } else if (weather === "Rainy") {
+                    wind = 20;
+                } else if (weather === "Stormy") {
+                    wind = 50;
+                }
+                windElement.innerText = wind + " km/h";
+            }
+
+            // Update SDG message randomly
+            let newSdgMessage = sdgMessages[Math.floor(Math.random() * sdgMessages.length)];
+            sdgMessageElement.innerText = newSdgMessage;
+        }
+
+        // Clear the canvas and redraw everything
+        function drawGame(str) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPacman(str);
+            drawTrash();
+        }
+
+        function drawTrash() {
+            ctx.beginPath();
+            // Trash can body (rectangle)
+            ctx.rect(trash.x, trash.y, trash.size, trash.size * 1.5);
+            ctx.fillStyle = "gray";
+            ctx.fill();
+            ctx.closePath();
+
+            // Trash can lid (semi-circle)
+            ctx.beginPath();
+            ctx.arc(trash.x + trash.size / 2, trash.y, trash.size / 2, Math.PI, 2 * Math.PI);
+            ctx.fillStyle = "darkgray";
+            ctx.fill();
+            ctx.closePath();
+        }
+        function clearTrash() {
+    ctx.clearRect(trash.x, trash.y, trash.size, trash.size * 1.5); // Clear the trash can body
+    ctx.clearRect(trash.x, trash.y - trash.size / 2, trash.size, trash.size / 2); // Clear the trash can lid
+}
+    function clearpacman() {
+    ctx.clearRect(trash.x, trash.y, trash.size, trash.size * 1.5); // Clear the trash can body
+    ctx.clearRect(trash.x, trash.y - trash.size / 2, trash.size, trash.size / 2); // Clear the trash can lid
+}
+
+        // Game loop to constantly update Pacman's position
+        function gameLoop() {
+
+            if (document.getElementById("score").innerText == 20){
+                clearTrash()
+                clearPacman()
+                alert("Great job Today ! continue tomorrow")
+
+            }else {
+            movePacman();
+            drawTrash()
+            drawGame(pacman.direction);
+            requestAnimationFrame(gameLoop);
+
+            }
+
+          
+
+        }
+
+        // Start the game loop
+        gameLoop();
+    </script>
+
+</body>
+</html>
